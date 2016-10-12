@@ -17,5 +17,9 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fm = getSupportFragmentManager();
         VideoListFragment videoListFragment =
                 (VideoListFragment) fm.findFragmentById(R.id.videoListFragment);
+
+        videoListFragment.getOnVideoSelectedListener();
+
+
     }
 }
