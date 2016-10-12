@@ -9,15 +9,21 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.usjr.finalsexam.R;
 import com.usjr.finalsexam.adapters.VideoListAdapter;
 import com.usjr.finalsexam.entity.Video;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class VideoListFragment extends Fragment implements AdapterView.OnItemClickListener {
+
+
 
     public interface OnVideoSelectedListener {
         void videoSelectedListener(Video video);
@@ -25,6 +31,8 @@ public class VideoListFragment extends Fragment implements AdapterView.OnItemCli
 
     private VideoListAdapter        mAdapter;
     private OnVideoSelectedListener mOnVideoSelectedListener;
+
+    List<Video> mVideoList = new ArrayList<>();
 
     private DatabaseReference mRootDb;
     private DatabaseReference mVideosDb;
@@ -58,8 +66,32 @@ public class VideoListFragment extends Fragment implements AdapterView.OnItemCli
 
         mAdapter = new VideoListAdapter(getContext(), new ArrayList<Video>());
         listView.setAdapter(mAdapter);
+        prepareData();
 
         return view;
+    }
+
+    public void prepareData(){
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (mVideoList == null) {
+                    mVideoList = new ArrayList<>();
+                }
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    Video vid = data.getValue(Video.class);
+                    mVideoList.add(vid);
+                    mAdapter.notifyDataSetChanged();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mRootDb.child("videos").addListenerForSingleValueEvent(valueEventListener);
     }
 
     @Override
